@@ -1,0 +1,10 @@
+{% extends 'web/public/base.html' %}
+{% block body %}
+  <div class="panel panel-success">
+    <div class="panel-heading">{% block panel-title %}{{ title }}{% endblock %}</div>
+    <div class="panel-body">
+      {% block app-page %}{% endblock %}
+    </div>
+    <div class="panel-footer"></div>
+  </div>
+{% endblock %}

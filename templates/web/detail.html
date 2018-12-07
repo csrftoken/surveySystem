@@ -1,0 +1,149 @@
+{% extends 'web/public/layout.html' %}
+{% block app-page %}
+  <div class="survey-detail" id="">
+    <el-form ref="form" :model="forms" label-width="80px" label-position="top">
+      <el-form-item v-for="(form, index) in forms" :label="form.label" :error="form.error">
+        <el-input v-if="form.showType == 'textarea'" type="textarea" v-model="form.val"></el-input>
+        <el-radio-group v-model="form.val" v-if="form.showType == 'radio'">
+          <el-radio v-for="(choice, index) in form.choices" :label="choice.val">
+            {% templatetag openvariable %}choice.label{% templatetag closevariable %}
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="onSubmit">创建问卷调查</el-button>
+        <el-button>取消</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+{% endblock %}
+{% block js %}
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        forms: [
+          {
+            "label": "苑浩老师是否经常洗头?",
+            "key": "101",
+            "val": "",
+            "error": "该选项为必填项",
+            "showType": "radio",
+            "choices": [
+              {
+                "label": "从未出现",
+                "val": "100"
+              },
+              {
+                "label": "偶尔出现",
+                "val": "99"
+              },
+              {
+                "label": "经常出现",
+                "val": "98"
+              }
+            ]
+          },
+          {
+            "label": "你如何评价苑浩老师不洗头的问题？",
+            "key": "102",
+            "val": "",
+            "showType": "radio",
+            "error": "该选项为必填项",
+            "choices": [
+              {
+                "label": "非常满意",
+                "val": "10"
+              },
+              {
+                "label": "满意",
+                "val": "8"
+              },
+              {
+                "label": "一般",
+                "val": "5"
+              },
+              {
+                "label": "差",
+                "val": "3"
+              }
+            ]
+          },
+          {
+            "label": "你们知道苑浩老师洗澡吗？",
+            "key": "102",
+            "val": "",
+            "showType": "radio",
+            "error": "该选项为必填项",
+            "choices": [
+              {
+                "label": "非常清晰",
+                "val": "10"
+              },
+              {
+                "label": "比较清晰",
+                "val": "8"
+              },
+              {
+                "label": "一般",
+                "val": "5"
+              },
+              {
+                "label": "较差",
+                "val": "3"
+              }
+            ]
+          },
+          {
+            "label": "你怎么评价苑浩老师讲课能力？",
+            "key": "102",
+            "val": "",
+            "showType": "radio",
+            "error": "该选项为必填项",
+            "choices": [
+              {
+                "label": "666（控场极强）",
+                "val": "10"
+              },
+              {
+                "label": "66（不太流畅，互动不强）",
+                "val": "8"
+              },
+              {
+                "label": "（太不流畅，无互动） ",
+                "val": "5"
+              },
+              {
+                "label": "（经常卡壳）",
+                "val": "3"
+              }
+            ]
+          },
+          {
+            "label": "你对苑浩老师有什么评价或建议？",
+            "key": "103",
+            "val": "",
+            "showType": "textarea",
+            "error": "该选项为必填项",
+            "choices": []
+          }
+        ]
+      },
+      mounted() {
+      },
+      computed: {},
+      methods: {
+        onSubmit() {
+          console.log('submit!');
+          console.log(this.getFormData());
+        },
+        getFormData() {
+          return this.forms
+        },
+        getError(form) {
+          return ""
+        }
+      }
+    })
+  </script>
+{% endblock %}

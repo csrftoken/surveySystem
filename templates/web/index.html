@@ -1,0 +1,126 @@
+{% extends 'web/public/layout.html' %}
+{% block app-page %}
+  <template>
+    <div class="row">
+      <div class="col-xs-2">
+        <input type="text" class="form-control" placeholder="标题、班级名称" v-model="search">
+      </div>
+      <div class="col-xs-1">
+        <button class="btn btn-success">查询</button>
+      </div>
+    </div>
+    <br>
+    <el-table :data="tableData" style="width: 100%">
+      <el-table-column
+          v-for="(column, index) in tableColumn"
+          :prop="column.prop"
+          :label="column.label">
+        <template slot-scope="data">
+          <div v-html="data.row[column.prop]"></div>
+        </template>
+      </el-table-column>
+    </el-table>
+  </template>
+{% endblock %}
+{% block js %}
+  <script>
+
+    new Vue({
+      el: '#app',
+      data: {
+        // 展示的字段
+        fields: [],
+        // 数据
+        items: [],
+        // 数据数量
+        totalRows: 0,
+        // 一页多少条
+        perPage: 2,
+        // 当前页码
+        currentPage: 1,
+        // 搜索字段值
+        search: '',
+        tableColumn: [
+          {
+            prop: 'name',
+            label: '问卷名称',
+          },
+          {
+            prop: 'cls_name',
+            label: '班级',
+          },
+          {
+            prop: 'link',
+            label: '填写链接'
+          },
+          {
+            prop: 'handle',
+            label: '操作'
+          }
+        ],
+        tableData: [
+          {
+            name: 'python全栈15期第一次问卷调查',
+            cls_name: '全栈15期',
+            link: "<a href='/surveys/1/'>crm.oldboyedu.com/survery/1/</a>",
+            handle: "<button type=\"button\" class=\"el-button el-button--success el-button--mini\"><span>查看报告</span></button><button type=\"button\" class=\"el-button el-button--default el-button--mini\"><span>编辑</span></button>"
+          },
+          {
+            name: 'python全栈14期第二次问卷调查',
+            cls_name: '全栈14期',
+            link: "<a href='/surveys/1/'>crm.oldboyedu.com/survery/4/</a>",
+            handle: "<button type=\"button\" class=\"el-button el-button--success el-button--mini\"><span>查看报告</span></button><button type=\"button\" class=\"el-button el-button--default el-button--mini\"><span>编辑</span></button>"
+          },
+          {
+            name: 'python全栈17期第三次问卷调查',
+            cls_name: '全栈17期',
+            link: "<a href='/surveys/1/'>crm.oldboyedu.com/survery/8/</a>",
+            handle: "<button type=\"button\" class=\"el-button el-button--success el-button--mini\"><span>查看报告</span></button><button type=\"button\" class=\"el-button el-button--default el-button--mini\"><span>编辑</span></button>"
+          },
+        ]
+      },
+      mounted() {
+        // this.initData();
+        // this.initDeleteBtn();
+        // this.initPageBtn();
+      },
+      computed: {
+        // 计算属性的 getter
+        offset: function () {
+          // `this` 指向 vm 实例
+          return (this.currentPage - 1) * this.perPage
+        }
+      },
+      methods: {
+        initData() {
+          var vm = this;
+          axios.get(`/api/surveys/?limit=${this.perPage}&offset=${this.offset}&search=${this.search}`).then(function (resp) {
+            vm.fields = resp.data.fields;
+            vm.tableData = resp.data.result.results;
+            vm.totalRows = resp.data.result.count;
+          })
+        },
+        initDeleteBtn() {
+          var vm = this;
+          $("#app table").on("click", "button", function () {
+            const pk = $(this).attr("pk");
+            axios.delete(`/api/books/${pk}`).then(function (resp) {
+              vm.initData();
+            })
+          })
+        },
+        initPageBtn() {
+          var vm = this;
+          $("ul.pagination").on("click", "li", function () {
+            vm.currentPage = $(this).find("a").attr("aria-posinset");
+            vm.initData();
+          })
+        },
+        searchData() {
+          this.initData()
+        }
+      }
+    })
+
+  </script>
+{% endblock %}
