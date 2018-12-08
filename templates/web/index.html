@@ -6,7 +6,7 @@
         <input type="text" class="form-control" placeholder="标题、班级名称" v-model="search">
       </div>
       <div class="col-xs-1">
-        <button class="btn btn-success">查询</button>
+        <button class="btn btn-success" @click="searchData()">查询</button>
       </div>
     </div>
     <br>
@@ -20,6 +20,15 @@
         </template>
       </el-table-column>
     </el-table>
+    <br>
+    <div class="block">
+      <span class="demonstration"></span>
+      <el-pagination
+          background
+          layout="pager"
+          :total="total" :page-size="perPage" :current-page="currentPage">
+      </el-pagination>
+    </div>
   </template>
 {% endblock %}
 {% block js %}
@@ -33,56 +42,19 @@
         // 数据
         items: [],
         // 数据数量
-        totalRows: 0,
+        total: 0,
         // 一页多少条
-        perPage: 2,
+        perPage: 1,
         // 当前页码
         currentPage: 1,
         // 搜索字段值
         search: '',
-        tableColumn: [
-          {
-            prop: 'name',
-            label: '问卷名称',
-          },
-          {
-            prop: 'cls_name',
-            label: '班级',
-          },
-          {
-            prop: 'link',
-            label: '填写链接'
-          },
-          {
-            prop: 'handle',
-            label: '操作'
-          }
-        ],
-        tableData: [
-          {
-            name: 'python全栈15期第一次问卷调查',
-            cls_name: '全栈15期',
-            link: "<a href='/surveys/1/'>crm.oldboyedu.com/survery/1/</a>",
-            handle: "<button type=\"button\" class=\"el-button el-button--success el-button--mini\"><span>查看报告</span></button><button type=\"button\" class=\"el-button el-button--default el-button--mini\"><span>编辑</span></button>"
-          },
-          {
-            name: 'python全栈14期第二次问卷调查',
-            cls_name: '全栈14期',
-            link: "<a href='/surveys/1/'>crm.oldboyedu.com/survery/4/</a>",
-            handle: "<button type=\"button\" class=\"el-button el-button--success el-button--mini\"><span>查看报告</span></button><button type=\"button\" class=\"el-button el-button--default el-button--mini\"><span>编辑</span></button>"
-          },
-          {
-            name: 'python全栈17期第三次问卷调查',
-            cls_name: '全栈17期',
-            link: "<a href='/surveys/1/'>crm.oldboyedu.com/survery/8/</a>",
-            handle: "<button type=\"button\" class=\"el-button el-button--success el-button--mini\"><span>查看报告</span></button><button type=\"button\" class=\"el-button el-button--default el-button--mini\"><span>编辑</span></button>"
-          },
-        ]
+        tableColumn: [],
+        tableData: []
       },
       mounted() {
-        // this.initData();
-        // this.initDeleteBtn();
-        // this.initPageBtn();
+        this.initData();
+        this.initPageBtn();
       },
       computed: {
         // 计算属性的 getter
@@ -95,24 +67,15 @@
         initData() {
           var vm = this;
           axios.get(`/api/surveys/?limit=${this.perPage}&offset=${this.offset}&search=${this.search}`).then(function (resp) {
-            vm.fields = resp.data.fields;
+            vm.tableColumn = resp.data.fields;
             vm.tableData = resp.data.result.results;
-            vm.totalRows = resp.data.result.count;
-          })
-        },
-        initDeleteBtn() {
-          var vm = this;
-          $("#app table").on("click", "button", function () {
-            const pk = $(this).attr("pk");
-            axios.delete(`/api/books/${pk}`).then(function (resp) {
-              vm.initData();
-            })
+            vm.total = resp.data.result.count;
           })
         },
         initPageBtn() {
           var vm = this;
-          $("ul.pagination").on("click", "li", function () {
-            vm.currentPage = $(this).find("a").attr("aria-posinset");
+          $("ul.el-pager").on("click", "li", function () {
+            vm.currentPage = $(this).text();
             vm.initData();
           })
         },

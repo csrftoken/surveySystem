@@ -127,3 +127,18 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
+
+#########################
+# REST FRAMEWORK CONFIG #
+#########################
+
+REST_FRAMEWORK = {
+    # 序列化时展示的时间格式
+    'DATETIME_FORMAT': "%Y-%m-%d %H:%M:%S",
+    # 自定义返回值，修改默认只有detail的返回值
+    # 'EXCEPTION_HANDLER': '',
+    # 分页器
+    'DEFAULT_PAGINATION_CLASS': 'api.service.pagination.CustomLimitOffsetPagination',
+    # 分页每页对应的数据
+    'PAGE_SIZE': 1
+}
