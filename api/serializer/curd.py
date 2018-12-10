@@ -32,11 +32,12 @@ class SurveySerializer(serializers.ModelSerializer):
 
     def get_link(self, instance):
         request = self.context["request"]
-        return "{}://{}{}".format(
+        link = "{}://{}{}".format(
             request.scheme,
             request.get_host(),
             reverse('survey-detail', args=(instance.pk, ))
         )
+        return "<a href='{link}'>{link}</a>".format(link=link)
 
     def get_handle(self, instance):
         """
