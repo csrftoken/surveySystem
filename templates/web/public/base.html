@@ -22,11 +22,11 @@
     {% block body %}{% endblock %}
   </div>
   <!-- Add this after vue.js -->
-  <script src="//cdn.bootcss.com/vue/2.5.17/vue.min.js"></script>
+  <script src="{% static 'js/vue.js' %}"></script>
     <!-- 引入组件库 -->
-  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
-  <script src="https://cdn.bootcss.com/axios/0.18.0/axios.min.js"></script>
-  <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+  <script src="{% static 'js/element-ui.js' %}"></script>
+  <script src="{% static 'js/axios.js' %}"></script>
+  <script src="{% static 'js/jquery.js' %}"></script>
   {% block js %}{% endblock %}
 </body>
 </html>
