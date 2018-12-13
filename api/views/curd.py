@@ -4,6 +4,7 @@
 
 from rest_framework import generics
 from rest_framework.filters import SearchFilter
+from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
 from web import models
@@ -15,7 +16,7 @@ class SurveyApi(generics.ListAPIView):
     queryset = models.Survey.objects.all()
     serializer_class = curd.SurveySerializer
 
-    filter_backends = (SearchFilter,)
+    filter_backends = (SearchFilter, OrderingFilter, )
     search_fields = ("name",)
 
     fields = [

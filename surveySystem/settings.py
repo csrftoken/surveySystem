@@ -140,5 +140,9 @@ REST_FRAMEWORK = {
     # 分页器
     'DEFAULT_PAGINATION_CLASS': 'api.service.pagination.CustomLimitOffsetPagination',
     # 分页每页对应的数据
-    'PAGE_SIZE': 1
+    'PAGE_SIZE': 1,
+    # 默认的认证类器
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    ),
 }

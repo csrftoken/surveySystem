@@ -22,4 +22,5 @@ urlpatterns = [
 
     path('api/', include('api.urls')),
     path(r'', include('web.urls')),
+    path(r'', include('jwt_demo.urls')),
 ]

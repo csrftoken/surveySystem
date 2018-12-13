@@ -10,11 +10,13 @@
       </div>
     </div>
     <br>
-    <el-table :data="tableData" style="width: 100%">
+    <el-table :data="tableData" style="width: 100%" @sort-change='sortChange'>
       <el-table-column
           v-for="(column, index) in tableColumn"
           :prop="column.prop"
-          :label="column.label">
+          :label="column.label"
+          sortable="custom"
+      >
         <template slot-scope="data">
           <div v-html="data.row[column.prop]"></div>
         </template>
@@ -48,7 +50,10 @@
         // 当前页码
         currentPage: 1,
         // 搜索字段值
+        orderingFields: ['name', ],
+        ordering: '',
         search: '',
+        // 排序字段
         tableColumn: [],
         tableData: []
       },
@@ -66,7 +71,9 @@
       methods: {
         initData() {
           var vm = this;
-          axios.get(`/api/surveys/?limit=${this.perPage}&offset=${this.offset}&search=${this.search}`).then(function (resp) {
+          axios.get(
+            `/api/surveys/?limit=${this.perPage}&offset=${this.offset}&search=${this.search}&ordering=${this.ordering}`
+          ).then(function (resp) {
             vm.tableColumn = resp.data.fields;
             vm.tableData = resp.data.result.results;
             vm.total = resp.data.result.count;
@@ -81,6 +88,23 @@
         },
         searchData() {
           this.initData()
+        },
+        sortChange (column){
+
+          if (column.order){
+            let sort = column.order === 'ascending' ? '-': '';
+            this.ordering = `${sort}${column.prop}`
+          }else {
+            this.ordering = '';
+          }
+
+          this.initData();
+          // console.log(column.prop); //prop标签 => nickname
+          // console.log(column.order);//descending降序、ascending升序
+        },
+        isSort (column){
+          console.log(column, "22222");
+          return 'custom'
         }
       }
     })
