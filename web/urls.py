@@ -16,6 +16,7 @@ survey_urlpatterns = [
 ]
 
 
+# 路由分发
 urlpatterns = [
     re_path('^surveys/', include(survey_urlpatterns)),
 ]

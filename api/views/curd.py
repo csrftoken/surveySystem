@@ -64,3 +64,14 @@ class SurveyApi(generics.ListAPIView):
             "result": serializer.data,
             # "search_fields": self.search_fields
         })
+
+
+class SurveyDetailApi(generics.ListCreateAPIView):
+
+    queryset = models.SurveyItem.objects.all()
+    serializer_class = curd.SurveyItemSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset()).filter(survey=kwargs.get("pk"))
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

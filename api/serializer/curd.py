@@ -60,3 +60,29 @@ class SurveySerializer(serializers.ModelSerializer):
         data["number"] = instance.surveyrecord_set.count()
 
         return data
+
+
+class SurveyChoicesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.SurveyChoices
+        fields = (
+            "content",
+            "points",
+        )
+
+
+class SurveyItemSerializer(serializers.ModelSerializer):
+
+    choices = SurveyChoicesSerializer(source="answers", many=True)
+    value = serializers.CharField(default="")
+
+    class Meta:
+        model = models.SurveyItem
+        fields = (
+            "id",
+            "name",
+            "answer_type",
+            "choices",
+            "value",
+        )
