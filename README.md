@@ -91,10 +91,41 @@ django模板与vue.js的变量都是使用“{{”和“}}”包裹起来的，�
     {% endverbatim %}
 ```
 
+### 文件下载
+
+* 问题
+
+```
+ `response` 实现文件流下载
+```
+
+* 解决
+
+```
+response['Content-Type'] = 'application/octet-stream'
+response['Content-Disposition'] = 'attachment; {}'.format(
+    "filename*=utf-8''{}".format(quote(self.file_name))
+)
+```
+
 ## 学习资料
 
 ```
 # 我所认为的RESTful API最佳实践
 http://www.scienjus.com/my-restful-api-best-practices/
+
+# `xlwt` 简单使用
+
+import xlwt
+
+xls = xlwt.Workbook(encoding="utf-8", style_compression=2)
+sheet = xls.add_sheet("唯一码", cell_overwrite_ok=True)
+sheet.write(0, 0, '号码')
+
+for index, code in enumerate(queryset.iterator(), 1):
+    sheet.write(index, 0, code.unique_code)
+
+xls.save(`file_name`)
+
 ```
 
