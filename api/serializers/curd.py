@@ -73,9 +73,15 @@ class SurveyChoicesSerializer(serializers.ModelSerializer):
 
 
 class SurveyItemSerializer(serializers.ModelSerializer):
-
-    choices = SurveyChoicesSerializer(source="answers", many=True)
-    value = serializers.CharField(default="")
+    survey_item = serializers.CharField(source="pk")
+    choices = SurveyChoicesSerializer(source="answers", many=True, required=False, allow_null=True)
+    value = serializers.CharField(
+        default="",
+        error_messages={
+            "required": "该项为必填项",
+            "blank": "该项为必填项"
+        },
+    )
 
     class Meta:
         model = models.SurveyItem
@@ -85,4 +91,59 @@ class SurveyItemSerializer(serializers.ModelSerializer):
             "answer_type",
             "choices",
             "value",
+
+            "survey_item",
         )
+        # read_only_fields = (
+        #     "choices", "name", "answer_type",
+        # )
+
+    def to_representation(self, instance):
+        data = super(SurveyItemSerializer, self).to_representation(instance)
+
+        data["survey"] = self.context["view"].kwargs.get("pk")
+
+        return data
+
+
+class SurveyRecordSerializer(serializers.ModelSerializer):
+
+    value = serializers.CharField(
+        required=False,
+        # allow_blank=True, allow_null=True,
+        error_messages={
+            "required": "该项为必填项",
+            "blank": "该项为必填项"
+        }
+    )
+
+    class Meta:
+        model = models.SurveyRecord
+        fields = (
+            "survey",
+            "survey_item",
+            "value",
+        )
+
+    def validate(self, data):
+
+        survey_item = data.get("survey_item")
+
+        if survey_item.answer_type == "score":
+            data["score"] = data.pop("value")
+            data["single"] = survey_item.answers.filter(points=data["score"]).first()
+        else:
+            data["suggestion"] = data.pop("value")
+
+        data["survey_code"] = models.SurveyCode.objects.get(unique_code=self.context.get("unique_code"))
+
+        return data
+
+
+class UniqueCodeSerializer(serializers.Serializer):
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass

@@ -11,7 +11,7 @@ from django.conf import settings
 from django.views import View
 from django.views.generic import TemplateView
 from django.http.response import StreamingHttpResponse
-from django.http.response import FileResponse
+# from django.http.response import FileResponse
 
 from .. import models
 

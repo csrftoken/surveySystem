@@ -97,7 +97,7 @@ class SurveyRecord(models.Model):
     suggestion = models.TextField("建议", max_length=1024, blank=True, null=True)
     single = models.ForeignKey("SurveyChoices", verbose_name='单选', blank=True, null=True, on_delete=models.CASCADE)
     survey_code = models.ForeignKey("SurveyCode", verbose_name="唯一码", blank=True, null=True, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True, verbose_name=u"答题日期")
+    date = models.DateTimeField(auto_now_add=True, verbose_name="答题日期")
 
     class Meta:
         verbose_name = "问卷记录"

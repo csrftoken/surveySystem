@@ -9,7 +9,7 @@ from rest_framework.response import Response
 
 from web import models
 
-from ..serializer import curd
+from ..serializers import curd
 
 
 class SurveyApi(generics.ListAPIView):
@@ -69,9 +69,34 @@ class SurveyApi(generics.ListAPIView):
 class SurveyDetailApi(generics.ListCreateAPIView):
 
     queryset = models.SurveyItem.objects.all()
-    serializer_class = curd.SurveyItemSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return curd.SurveyRecordSerializer
+        else:
+            return curd.SurveyItemSerializer
+
+    def get_serializer_context(self):
+        context = super(SurveyDetailApi, self).get_serializer_context()
+
+        context["unique_code"] = self.request.data.get("unique_code")
+
+        return context
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset()).filter(survey=kwargs.get("pk"))
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        unique_code = request.data.get("unique_code")
+
+        if not unique_code or models.SurveyRecord.objects.filter(unique_code=unique_code).exists():
+            return Response({"errcode": False, "errmsg": "唯一码已被使用或唯一码不能为空"})
+
+        serializer = self.get_serializer(data=request.data.get("data"), many=True)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response({"errcode": True})
+        else:
+            return Response(serializer.errors)
