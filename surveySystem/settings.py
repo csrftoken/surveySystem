@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+# import raven
+import sentry_sdk
+
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,7 +27,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '5@lu5!(i^ms6t_^n$6ddic_k$nak3s-cpb%=f#7ng^lcx9*wm='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -38,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # ThirtyParty
+    'raven.contrib.django.raven_compat',
     # MIME
     'web',
     'api',
@@ -146,3 +152,23 @@ REST_FRAMEWORK = {
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
 }
+
+#########
+# RAVEN #
+#########
+
+# RAVEN_CONFIG = {
+#     'dsn': 'https://81a07f99f3554af9acfed709f8ccd7a5@sentry.io/1355566',
+#     # If you are using git, you can also automatically configure the
+#     # release based on the git info.
+#     'release': raven.fetch_git_sha(os.path.abspath(os.pardir)),
+# }
+
+sentry_sdk.init(
+    # dsn地址
+    dsn="https://81a07f99f3554af9acfed709f8ccd7a5@sentry.io/1355566",
+    # 根据项目进行集成
+    integrations=[DjangoIntegration()],
+    # 配置环境
+    environment="staging"
+)
