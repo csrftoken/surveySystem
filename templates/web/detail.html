@@ -1,10 +1,14 @@
 {% extends 'web/public/layout.html' %}
 {% block app-page %}
   <div class="survey-detail" id="{{ pk }}">
-    <el-input class="col-md-3" v-model="uniqueCode" placeholder="请输入唯一码"></el-input>
+    <div class="row">
+      <div class="col-xs-3">
+        <el-input v-model="uniqueCode" placeholder="请输入唯一码"></el-input>
+      </div>
+    </div>
     <hr>
     <el-form ref="form" :model="forms" label-width="80px" label-position="top">
-      <el-form-item v-for="(form, index) in forms" :label="form.name">
+      <el-form-item v-for="(form, index) in forms" :label="form.name" :error="form.error">
         <el-input v-if="form.answer_type == 'suggestion'" type="textarea" v-model="form.value"></el-input>
         <el-radio-group v-model="form.value" v-if="form.answer_type == 'score'">
           <el-radio v-for="(choice, index) in form.choices" :label="choice.points">
@@ -42,13 +46,33 @@
         onSubmit() {
           let data = this.getFormData();
           let pk = $("div.survey-detail").prop("id");
+          let vm = this;
           axios.post(
             `/api/surveys/${pk}/`, {
               "data": data,
               "unique_code": this.uniqueCode,
             }
             ).then(function (resp) {
-            console.log(resp);
+            let res = resp.data;
+            if (res.errcode) {
+              alert("提交成功");
+              location.reload();
+            } else {
+              if (typeof(res.data) === "string") {
+                alert(res.data)
+              } else {
+                for (let i = 0; i < res.data.length; i++) {
+
+                  var errors = res.data[i].value;
+
+                  if (errors){
+                    vm.forms[i].error = res.data[i].value.toString();
+                  }else {
+                    vm.forms[i].error = ""
+                  }
+                }
+              }
+            }
           })
         },
         getFormData() {

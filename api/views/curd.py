@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # Date: 2018/12/6
 
+from django.utils.timezone import now
+
 from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from rest_framework.filters import OrderingFilter
@@ -10,6 +12,7 @@ from rest_framework.response import Response
 from web import models
 
 from ..serializers import curd
+from ..service.response import CustomResponse
 
 
 class SurveyApi(generics.ListAPIView):
@@ -91,12 +94,23 @@ class SurveyDetailApi(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         unique_code = request.data.get("unique_code")
 
-        if not unique_code or models.SurveyRecord.objects.filter(unique_code=unique_code).exists():
-            return Response({"errcode": False, "errmsg": "唯一码已被使用或唯一码不能为空"})
+        if not unique_code:
+            return CustomResponse(errcode=False, data="唯一码不能为空")
+
+        codes = models.SurveyCode.objects.filter(unique_code=unique_code, survey=kwargs.get("pk"))
+        if not codes.exists():
+            return CustomResponse(errcode=False, data="无效的唯一码")
+
+        if models.SurveyRecord.objects.filter(survey_code__unique_code=unique_code).exists():
+            return CustomResponse(errcode=False, data="唯一已使用")
 
         serializer = self.get_serializer(data=request.data.get("data"), many=True)
         if serializer.is_valid():
             self.perform_create(serializer)
-            return Response({"errcode": True})
+            code = codes.first()
+            code.used = True
+            code.used_time = now()
+            code.save(update_fields=("used", "used_time", ), )
+            return CustomResponse(errcode=True, data={})
         else:
-            return Response(serializer.errors)
+            return CustomResponse(errcode=False, data=serializer.errors)

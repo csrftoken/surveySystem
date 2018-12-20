@@ -4,6 +4,7 @@
 
 from django.urls import reverse
 from django.template import loader
+from django.db.models import Count
 
 from rest_framework import serializers
 
@@ -57,7 +58,9 @@ class SurveySerializer(serializers.ModelSerializer):
 
         data = super(SurveySerializer, self).to_representation(instance)
 
-        data["number"] = instance.surveyrecord_set.count()
+        data["number"] = instance.surveyrecord_set.values("survey_code").annotate(
+            count=Count("survey_code")
+        ).count()
 
         return data
 
@@ -82,6 +85,7 @@ class SurveyItemSerializer(serializers.ModelSerializer):
             "blank": "该项为必填项"
         },
     )
+    error = serializers.CharField(default="")
 
     class Meta:
         model = models.SurveyItem
@@ -93,6 +97,7 @@ class SurveyItemSerializer(serializers.ModelSerializer):
             "value",
 
             "survey_item",
+            "error"
         )
         # read_only_fields = (
         #     "choices", "name", "answer_type",
@@ -135,7 +140,9 @@ class SurveyRecordSerializer(serializers.ModelSerializer):
         else:
             data["suggestion"] = data.pop("value")
 
-        data["survey_code"] = models.SurveyCode.objects.get(unique_code=self.context.get("unique_code"))
+        code = models.SurveyCode.objects.get(unique_code=self.context.get("unique_code"))
+
+        data["survey_code"] = code
 
         return data
 
