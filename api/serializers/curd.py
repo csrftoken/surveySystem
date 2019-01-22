@@ -5,27 +5,27 @@
 from django.urls import reverse
 from django.template import loader
 from django.db.models import Count
+from django.db import transaction
+from django.utils.timezone import now
 
 from rest_framework import serializers
 
 from web import models
 
-from ..service.fields import CustomCharField
-
 
 class SurveySerializer(serializers.ModelSerializer):
-
-    by_class = CustomCharField()
+    by_class = serializers.CharField(source="by_class.course")
     link = serializers.SerializerMethodField()
     handle = serializers.SerializerMethodField()
 
     HANDLE_TEMPLATE = "components/handle.html"
 
     class Meta:
-        model = models.Survey
+        model = models.MiddleSurvey
         fields = (
             "name",
             "by_class",
+            "number",
             "link",
             "handle",
             "date",
@@ -95,18 +95,14 @@ class SurveyItemSerializer(serializers.ModelSerializer):
             "answer_type",
             "choices",
             "value",
-
             "survey_item",
             "error"
         )
-        # read_only_fields = (
-        #     "choices", "name", "answer_type",
-        # )
 
     def to_representation(self, instance):
         data = super(SurveyItemSerializer, self).to_representation(instance)
 
-        data["survey"] = self.context["view"].kwargs.get("pk")
+        data["survey"] = self.context.get("survey_id")
 
         return data
 
@@ -134,23 +130,106 @@ class SurveyRecordSerializer(serializers.ModelSerializer):
 
         survey_item = data.get("survey_item")
 
-        if survey_item.answer_type == "score":
+        if survey_item.answer_type == "single":
             data["score"] = data.pop("value")
             data["single"] = survey_item.answers.filter(points=data["score"]).first()
         else:
             data["suggestion"] = data.pop("value")
 
-        code = models.SurveyCode.objects.get(unique_code=self.context.get("unique_code"))
-
-        data["survey_code"] = code
+        data["survey_code"] = self.context.get("unique_code")
+        data["middle_survey_id"] = self.context["view"].kwargs.get("pk")
 
         return data
 
 
-class UniqueCodeSerializer(serializers.Serializer):
+class SurveyDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Survey
+        fields = (
+            "id",
+            "name",
+        )
+
+    def to_representation(self, instance):
+
+        data = super(SurveyDetailSerializer, self).to_representation(instance)
+
+        self.context["survey_id"] = data["id"]
+        data["questions"] = SurveyItemSerializer(
+            instance.questions.all(), many=True, context=self.context
+        ).data
+
+        return data
+
+
+class MiddleSurveySerializer(serializers.ModelSerializer):
+    surveys = SurveyDetailSerializer(many=True)
+
+    class Meta:
+        model = models.MiddleSurvey
+        fields = (
+            "name",
+            "surveys",
+        )
+
+
+class SurveyCreateSerializer(serializers.Serializer):
+
+    id = serializers.IntegerField()
+    questions = SurveyRecordSerializer(many=True)
 
     def create(self, validated_data):
-        pass
+        return validated_data
 
     def update(self, instance, validated_data):
-        pass
+        return instance
+
+
+class MiddleSurveyCreateSerializer(serializers.Serializer):
+
+    unique_code = serializers.CharField(
+        error_messages={
+            "required": "唯一码不可为空", "null": "唯一码不可为空", "blank": "唯一码不可为空"
+        }
+    )
+    surveys = serializers.ListSerializer(child=SurveyCreateSerializer())
+
+    def validate_unique_code(self, value):
+
+        codes = models.SurveyCode.objects.filter(unique_code=value)
+        if not codes.exists():
+            raise serializers.ValidationError("无效的唯一码")
+
+        if models.SurveyRecord.objects.filter(survey_code__unique_code=value).exists():
+            raise serializers.ValidationError("唯一码已使用")
+
+        self.context["unique_code"] = codes.first()
+
+        return self.context["unique_code"]
+
+    @transaction.atomic
+    def create(self, validated_data):
+
+        # 创建数据
+        for item in validated_data.get("surveys", []):
+
+            survey_records = []
+
+            for question in item.get("questions", []):
+                survey_records.append(
+                    models.SurveyRecord(**question)
+                )
+
+            models.SurveyRecord.objects.bulk_create(survey_records)
+
+        # 修改唯一状态
+        unique_code = validated_data.get("unique_code")
+        unique_code.used = True
+        unique_code.used_time = now()
+        unique_code.save(update_fields=("used", "used_time", ))
+
+        return {}
+
+    def update(self, instance, validated_data):
+        return instance

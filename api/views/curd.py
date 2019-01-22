@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 # Date: 2018/12/6
 
-from django.utils.timezone import now
+from django.contrib.auth import login
+from django.contrib.auth import authenticate
+from django.shortcuts import redirect
 
 from rest_framework import generics
 from rest_framework.filters import SearchFilter
@@ -15,8 +17,22 @@ from ..serializers import curd
 from ..service.response import CustomResponse
 
 
+class LoginApi(generics.CreateAPIView):
+
+    def create(self, request, *args, **kwargs):
+        username = self.request.data.get('username')
+        password = self.request.data.get('password')
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return CustomResponse(errcode=True)
+        else:
+            return CustomResponse(errcode=False, data="用户名或密码错误")
+
+
 class SurveyApi(generics.ListAPIView):
-    queryset = models.Survey.objects.all()
+    queryset = models.MiddleSurvey.objects.all()
     serializer_class = curd.SurveySerializer
 
     filter_backends = (SearchFilter, OrderingFilter, )
@@ -69,15 +85,17 @@ class SurveyApi(generics.ListAPIView):
         })
 
 
-class SurveyDetailApi(generics.ListCreateAPIView):
+class SurveyDetailApi(generics.CreateAPIView, generics.RetrieveAPIView):
 
-    queryset = models.SurveyItem.objects.all()
+    queryset = models.MiddleSurvey.objects.all()
+    pagination_class = None
 
     def get_serializer_class(self):
         if self.request.method == "POST":
-            return curd.SurveyRecordSerializer
+            # return curd.SurveyRecordSerializer
+            return curd.MiddleSurveyCreateSerializer
         else:
-            return curd.SurveyItemSerializer
+            return curd.MiddleSurveySerializer
 
     def get_serializer_context(self):
         context = super(SurveyDetailApi, self).get_serializer_context()
@@ -86,31 +104,15 @@ class SurveyDetailApi(generics.ListCreateAPIView):
 
         return context
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset()).filter(survey=kwargs.get("pk"))
-        serializer = self.get_serializer(queryset, many=True)
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        unique_code = request.data.get("unique_code")
-
-        if not unique_code:
-            return CustomResponse(errcode=False, data="唯一码不能为空")
-
-        codes = models.SurveyCode.objects.filter(unique_code=unique_code, survey=kwargs.get("pk"))
-        if not codes.exists():
-            return CustomResponse(errcode=False, data="无效的唯一码")
-
-        if models.SurveyRecord.objects.filter(survey_code__unique_code=unique_code).exists():
-            return CustomResponse(errcode=False, data="唯一已使用")
-
-        serializer = self.get_serializer(data=request.data.get("data"), many=True)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
-            code = codes.first()
-            code.used = True
-            code.used_time = now()
-            code.save(update_fields=("used", "used_time", ), )
-            return CustomResponse(errcode=True, data={})
+            return CustomResponse(errcode=True)
         else:
             return CustomResponse(errcode=False, data=serializer.errors)

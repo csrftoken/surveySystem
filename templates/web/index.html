@@ -8,6 +8,9 @@
       <div class="col-xs-1">
         <button class="btn btn-success" @click="searchData()">查询</button>
       </div>
+      <div class="col-xs-1">
+        <button class="btn btn-success"><a href="/admin/web/middlesurvey/add/" style="color: white">添加问卷</a></button>
+      </div>
     </div>
     <br>
     <el-table :data="tableData" style="width: 100%" @sort-change='sortChange'>
@@ -46,7 +49,7 @@
         // 数据数量
         total: 0,
         // 一页多少条
-        perPage: 1,
+        perPage: 30,
         // 当前页码
         currentPage: 1,
         // 搜索字段值
@@ -99,11 +102,8 @@
           }
 
           this.initData();
-          // console.log(column.prop); //prop标签 => nickname
-          // console.log(column.order);//descending降序、ascending升序
         },
         isSort (column){
-          console.log(column, "22222");
           return 'custom'
         }
       }

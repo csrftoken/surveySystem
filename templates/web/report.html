@@ -1,0 +1,227 @@
+{% extends 'web/public/layout.html' %}
+{% load staticfiles %}
+{% block css %}
+  <style>
+    .question-name {
+      color: #B24926;
+      font-weight: bold
+    }
+
+    .question-detail, .suggestion-detail {
+      margin-top: 30px;
+    }
+
+  </style>
+{% endblock %}
+{% block app-page %}
+  {% csrf_token %}
+  <div class="col-xs-12">
+    <div>
+      共收到有效问卷调查
+      <strong>{{ count }}</strong>
+      份
+    </div>
+    <hr>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist" id="surveyTab">
+      {% for item in result %}
+        <li role="presentation" class="{% if forloop.first %}active{% endif %}">
+          <a href="#{{ item.id }}" aria-controls="{{ item.id }}" role="tab" data-toggle="tab">{{ item.name }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+    <!-- Tab panes -->
+    <div class="tab-content">
+      {% for item in result %}
+        <div role="tabpanel" class="tab-pane{% if forloop.first %} active{% endif %}" id="{{ item.id }}">
+          <div style="margin-top: 20px">
+            <strong>总得分占比 {{ item.percent }}%</strong>
+          </div>
+          <br>
+          <div id="chart-{{ item.id }}" style="width: 100%;height: 450px"></div>
+          <br>
+          <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active">
+              <a href="#details-{{ item.id }}" role="tab" data-toggle="tab">得分详情</a>
+            </li>
+            <li role="presentation">
+              <a href="#choices-{{ item.id }}" role="tab" data-toggle="tab">选项</a>
+            </li>
+            <li role="presentation">
+              <a href="#suggestion-{{ item.id }}" role="tab" data-toggle="tab">建议</a>
+            </li>
+          </ul>
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="details-{{ item.id }}">
+              <div class="col-xs-12">
+                {% for code, value in item.answers.items %}
+                  <div class="checkbox" is_hide="{{ value.is_hide }}">
+                    <input type="checkbox" class="answer-code" value="{{ code }}"/>
+                    <p style="color:#B24926; font-size: 15px;font-weight: bold ">
+                      唯一码：{{ code }}&nbsp&nbsp&nbsp&nbsp总分：{{ value.score_sum }}</p>
+                    <ul>
+                      {% for item in value.questions %}
+                        <li>
+                          <span>问题：{{ item.name }}</span>
+                          &nbsp&nbsp&nbsp&nbsp
+                          <span>总分：{{ item.score }}</span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                {% endfor %}
+                <div>
+                  <button class="btn-info btn" onclick="bindCheckboxBtn('{{ item.id }}')">修改</button>
+                </div>
+              </div>
+            </div>
+            <div role="tabpanel" class="tab-pane choice" id="choices-{{ item.id }}">
+              <div class="col-xs-12">
+                <ul class="question-detail">
+                  {% for pk, val in item.choices.items %}
+                    <li id="question-{{ pk }}">
+                      题目：
+                      <span class="question-name">{{ val.name }}</span>
+                      总分:
+                      <span class="question-score">{{ val.score }}</span>
+                      实际得分:
+                      <span class="question-real-score">{{ val.real_score }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="suggestion-{{ item.id }}">
+              <div class="col-xs-12">
+                <ul class="suggestion-detail">
+                  {% for suggestion in item.suggestions %}
+                    <li>{{ suggestion }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
+{% block js %}
+  <script src="{% static 'js/echarts.js' %}"></script>
+  <script>
+    $(document).ready(function () {
+      initChart();
+      initDefaultCheckbox();
+      bindSurveyTabBtn();
+    });
+
+    /*
+     *  初始化图表
+     */
+    function initChart() {
+      let pk = $("#surveyTab>li.active a").attr("href");
+      let reportChart = echarts.init(document.getElementById("chart-" + pk.substring(1,)));
+      let option = {
+        color: ['#003366', '#006699', '#4cabce'],
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+            type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+          }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        legend: {
+          data: ['实际得分']
+        },
+        xAxis: [
+          {
+            type: 'category',
+            data: [],
+            axisTick: {
+              alignWithLabel: true
+            }
+          }
+        ],
+        yAxis: [
+          {
+            type: 'value'
+          }
+        ],
+        series: [
+          {
+            name: '实际得分',
+            type: 'bar',
+            barWidth: '60%',
+            data: []
+          }
+        ]
+      };
+
+      // 获取选项标签
+      let choiceEle = $("#choices-" + pk.substring(1,));
+
+      $.each($(choiceEle).find("span.question-name"), function (key, value) {
+        option.xAxis[0]["data"].push(value.innerText)
+      });
+
+      $.each($(choiceEle).find("span.question-real-score"), function (key, value) {
+        option.series[0]["data"].push(value.innerText)
+      });
+
+      reportChart.setOption(option);
+    }
+
+    function bindSurveyTabBtn() {
+      $("#surveyTab li").click(function () {
+        initChart();
+      })
+    }
+
+    /*
+     *  初始化默认选中的标签
+     */
+    function initDefaultCheckbox() {
+      $("div[is_hide='True'] input").attr("checked", true);
+    }
+
+    /*
+     *  绑定选择框按钮事件
+     */
+    function bindCheckboxBtn(surveyTabId) {
+      let details = document.getElementById("details-" + surveyTabId);
+      let hideCheckboxes = [];
+      let showCheckBoxes = [];
+
+      $($(details).find("input[type=checkbox]")).each(function (key, value) {
+        if (value.checked){
+          hideCheckboxes.push($(value).val());
+        }else {
+          showCheckBoxes.push($(value).val());
+        }
+      });
+
+      $.ajax({
+        url: window.location.href,
+        type: 'POST',
+        traditional: true,
+        data: {
+          "survey_id": surveyTabId,
+          "hide_codes": hideCheckboxes,
+          "show_codes": showCheckBoxes,
+          "csrfmiddlewaretoken": $("input[name='csrfmiddlewaretoken']").val()
+        },
+        success: function (data) {
+          if (data.status){
+            location.reload(true)
+          }
+        }
+      })
+    }
+
+  </script>
+{% endblock %}

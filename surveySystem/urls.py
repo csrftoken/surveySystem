@@ -17,27 +17,9 @@ from django.urls import path
 from django.urls import include
 from django.contrib import admin
 
-from django.shortcuts import HttpResponse
-
-
-def sentry(request):
-    from sentry_sdk import capture_exception
-
-    try:
-        a_potentially_failing_function()
-    except Exception as e:
-        # Alternatively the argument can be omitted
-        capture_exception(e)
-
-    return HttpResponse("ok")
-
-
 urlpatterns = [
     path(r'admin/', admin.site.urls),
 
     path('api/', include('api.urls')),
     path(r'', include('web.urls')),
-    path(r'', include('jwt_demo.urls')),
-
-    path(r'sentry/', sentry)
 ]

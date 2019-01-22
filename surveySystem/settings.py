@@ -11,10 +11,6 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
-# import raven
-import sentry_sdk
-
-from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -42,8 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # ThirtyParty
-    'raven.contrib.django.raven_compat',
     # MIME
     'web',
     'api',
@@ -114,15 +108,22 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-Hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
+
+
+LOGIN_URL = '/login/'
+
+LOGIN_REDIRECT_URL = ''
+
+LOGOUT_REDIRECT_URL = '/login/'
 
 
 # Static files (CSS, JavaScript, Images)
@@ -146,10 +147,10 @@ REST_FRAMEWORK = {
     # 分页器
     'DEFAULT_PAGINATION_CLASS': 'api.service.pagination.CustomLimitOffsetPagination',
     # 分页每页对应的数据
-    'PAGE_SIZE': 1,
+    'PAGE_SIZE': 30,
     # 默认的认证类器
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
 }
 
@@ -164,11 +165,11 @@ REST_FRAMEWORK = {
 #     'release': raven.fetch_git_sha(os.path.abspath(os.pardir)),
 # }
 
-sentry_sdk.init(
-    # dsn地址
-    dsn="https://81a07f99f3554af9acfed709f8ccd7a5@sentry.io/1355566",
-    # 根据项目进行集成
-    integrations=[DjangoIntegration()],
-    # 配置环境
-    environment="staging"
-)
+# sentry_sdk.init(
+#     # dsn地址
+#     dsn="https://81a07f99f3554af9acfed709f8ccd7a5@sentry.io/1355566",
+#     # 根据项目进行集成
+#     integrations=[DjangoIntegration()],
+#     # 配置环境
+#     environment="staging"
+# )

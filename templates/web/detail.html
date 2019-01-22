@@ -7,20 +7,25 @@
       </div>
     </div>
     <hr>
-    <el-form ref="form" :model="forms" label-width="80px" label-position="top">
-      <el-form-item v-for="(form, index) in forms" :label="form.name" :error="form.error">
+    <div v-for="(survey, index) in surveys">
+      <div class="row">
+        <div class="col-xs-3">
+          <h4>{% templatetag openvariable %}survey.name{% templatetag closevariable %}</h4>
+        </div>
+      </div>
+      <hr>
+      <el-form ref="survey" :model="survey.questions" label-width="80px" label-position="top">
+        <el-form-item v-for="(form, index) in survey.questions" :label="form.name" :error="form.error">
         <el-input v-if="form.answer_type == 'suggestion'" type="textarea" v-model="form.value"></el-input>
-        <el-radio-group v-model="form.value" v-if="form.answer_type == 'score'">
+        <el-radio-group v-model="form.value" v-if="form.answer_type == 'single'">
           <el-radio v-for="(choice, index) in form.choices" :label="choice.points">
             {% templatetag openvariable %}choice.content{% templatetag closevariable %}
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="onSubmit">创建问卷调查</el-button>
-        <el-button>取消</el-button>
-      </el-form-item>
     </el-form>
+    </div>
+    <el-button type="success" @click="onSubmit">创建问卷调查</el-button>
   </div>
 {% endblock %}
 {% block js %}
@@ -28,6 +33,7 @@
     new Vue({
       el: '#app',
       data: {
+        surveys: [],
         forms: [],
         uniqueCode: "",
       },
@@ -40,7 +46,7 @@
           let vm = this;
           let pk = $("div.survey-detail").prop("id");
           axios.get(`/api/surveys/${pk}/`).then(function (resp) {
-            vm.forms = resp.data;
+            vm.surveys = resp.data.surveys;
           })
         },
         onSubmit() {
@@ -49,7 +55,7 @@
           let vm = this;
           axios.post(
             `/api/surveys/${pk}/`, {
-              "data": data,
+              "surveys": data,
               "unique_code": this.uniqueCode,
             }
             ).then(function (resp) {
@@ -58,17 +64,21 @@
               alert("提交成功");
               location.reload();
             } else {
-              if (typeof(res.data) === "string") {
-                alert(res.data)
-              } else {
-                for (let i = 0; i < res.data.length; i++) {
 
-                  var errors = res.data[i].value;
+              if (res.data.unique_code){
+                alert(res.data.unique_code.toString())
+              }
 
-                  if (errors){
-                    vm.forms[i].error = res.data[i].value.toString();
-                  }else {
-                    vm.forms[i].error = ""
+              for (let i = 0; i < res.data.surveys.length; i++) {
+
+                let questions = res.data.surveys[i]["questions"];
+
+                for (let item = 0; item < questions.length; item++) {
+                  let errors = questions[item].value;
+                  if (errors) {
+                    vm.surveys[i]['questions'][item].error = errors.toString();
+                }else {
+                    vm.surveys[i]['questions'][item].error = ""
                   }
                 }
               }
@@ -76,10 +86,7 @@
           })
         },
         getFormData() {
-          return this.forms
-        },
-        getError(form) {
-          return ""
+          return this.surveys
         }
       }
     })

@@ -9,6 +9,7 @@ from .views import curd
 
 
 urlpatterns = [
+    path("login/", curd.LoginApi.as_view()),
     path("surveys/", curd.SurveyApi.as_view()),
-    re_path("surveys/(?P<pk>\d+)/", curd.SurveyDetailApi.as_view())
+    re_path("surveys/(?P<pk>\d+)/", curd.SurveyDetailApi.as_view()),
 ]

@@ -1,5 +1,5 @@
 <button type='button' class='el-button el-button--success el-button--mini'>
-  <span pk='{{ pk }}'>查看报告</span>
+  <span pk='{{ pk }}'><a href="{% url 'survey-report' pk %}" style="color: white">查看报告</a></span>
 </button>
 <a href="{% url 'survey-download' pk %}" class='el-button el-button--default el-button--mini'>
   <span pk='{{ pk }}'>下载</span>

@@ -1,0 +1,72 @@
+{% extends 'web/public/layout.html' %}
+{% block app-page %}
+  {% csrf_token %}
+  <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-position="top" label-width="100px">
+    <el-form-item label="用户名" prop="username">
+      <el-input type="text" v-model="ruleForm.username"></el-input>
+    </el-form-item>
+    <el-form-item label="密码" prop="password">
+      <el-input type="password" v-model="ruleForm.password"></el-input>
+    </el-form-item>
+    <el-row>
+      <el-button type="success" @click="login">登录</el-button>
+    </el-row>
+  </el-form>
+{% endblock %}
+{% block js %}
+  <script>
+    new Vue({
+      el: '#app',
+      data() {
+        let validateUsername = (rule, value, callback) => {
+          if (value === '') {
+            callback(new Error('请输入用户名'));
+          } else {
+            callback();
+          }
+        };
+        let validatePassword = (rule, value, callback) => {
+          if (value === '') {
+            callback(new Error('请输入密码'));
+          } else {
+            callback();
+          }
+        };
+        return {
+          ruleForm: {
+            username: '',
+            password: '',
+          },
+          rules: {
+            username: [
+              {validator: validateUsername, trigger: 'blur'}
+            ],
+            password: [
+              {validator: validatePassword, trigger: 'blur'}
+            ],
+          }
+        };
+      },
+      mounted() {
+      },
+      methods: {
+        login() {
+          this.$refs['ruleForm'].validate((valid) => {
+            if (valid) {
+              // 书写登录逻辑
+              axios.post(`/api/login/`, this.ruleForm).then(function (resp) {
+                if (resp.data.errcode){
+                  window.location.href = "/"
+                }else {
+                  alert(resp.data.data)
+                }
+              })
+            } else {
+              return false;
+            }
+          });
+        }
+      }
+    })
+  </script>
+{% endblock %}
