@@ -35,7 +35,7 @@ python manage.py migrate
 ## 导入虚拟数据
 
 ```
-
+python manage.py loaddata init.json
 ```
 
 ## 启动项目
