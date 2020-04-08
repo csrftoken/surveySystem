@@ -47,10 +47,21 @@ python manage.py loaddata init.json
 ### 启动项目
 
 ```
-python manage.py runserver 0.0.0.0:9527
+python manage.py runserver 0.0.0.0:8023
+
+后台地址：
+
+127.0.0.1:8023/admin/
+
+账号密码 root root23456
 ```
 
-### 访问首页示例
+### 效果图及代码结构图
+
+![image](https://hcdn2.luffycity.com/media/frontend/information/6DBA4BE6-8EA5-4AA7-A673-457D30FE906A.png)
+
+![image](https://hcdn2.luffycity.com/media/frontend/information/59A544B3-AE40-48DF-BA8A-2D58CB8CE9F2.png
+)
 
 ## 常见问题
 
