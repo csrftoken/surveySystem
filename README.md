@@ -147,11 +147,9 @@ xls.save(`file_name`)
 
 ## Donate
 
-如果本仓库对你有帮助，可以请作者喝杯白开水。
+如果本仓库对你有帮助，可以请作者喝杯白开水或Star。
 
 Thanks ~
-
-![image](https://hcdn2.luffycity.com/media/frontend/books/1711584789344_.pic.jpg){: width="100px" height="100px"}
 
 ## Support
 
