@@ -58,9 +58,9 @@ python manage.py runserver 0.0.0.0:8023
 
 ### 效果图及代码结构图
 
-![image](https://hcdn2.luffycity.com/media/frontend/information/6DBA4BE6-8EA5-4AA7-A673-457D30FE906A.png)
+![image](https://csrftoken.oss-cn-beijing.aliyuncs.com/github/6DBA4BE6-8EA5-4AA7-A673-457D30FE906A.png)
 
-![image](https://hcdn2.luffycity.com/media/frontend/information/59A544B3-AE40-48DF-BA8A-2D58CB8CE9F2_PoEo0dr.png)
+![image](https://csrftoken.oss-cn-beijing.aliyuncs.com/github/59A544B3-AE40-48DF-BA8A-2D58CB8CE9F2%2011.00.13.png)
 
 ## 常见问题
 
@@ -150,6 +150,8 @@ xls.save(`file_name`)
 如果本仓库对你有帮助，可以请作者喝杯白开水或Star。
 
 Thanks ~
+
+![image](https://csrftoken.oss-cn-beijing.aliyuncs.com/github/F83BF8B1-998B-4818-BDA9-1FAADEEFD16F.png?x-oss-process=image/resize,w_200)
 
 ## Support
 
