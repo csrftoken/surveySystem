@@ -152,7 +152,7 @@ xls.save(`file_name`)
 
 Thanks ~
 
-![image](https://hcdn2.luffycity.com/media/frontend/books/1711584789344_.pic.jpg)
+![image](https://hcdn2.luffycity.com/media/frontend/books/1711584789344_.pic.jpg){: width="100px" height="100px"}
 
 ## Support
 
