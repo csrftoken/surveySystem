@@ -22,6 +22,11 @@
             {% templatetag openvariable %}choice.content{% templatetag closevariable %}
           </el-radio>
         </el-radio-group>
+        <el-checkbox-group v-model="form.value" v-if="form.answer_type == 'multiple'">
+          <el-checkbox v-for="(choice, index) in form.choices" :label="choice.points">
+            {% templatetag openvariable %}choice.content{% templatetag closevariable %}
+          </el-checkbox>
+        </el-checkbox-group>
       </el-form-item>
     </el-form>
     </div>
@@ -34,7 +39,6 @@
       el: '#app',
       data: {
         surveys: [],
-        forms: [],
         uniqueCode: "",
       },
       mounted() {

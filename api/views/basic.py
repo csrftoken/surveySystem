@@ -4,7 +4,6 @@
 
 from django.contrib.auth import login
 from django.contrib.auth import authenticate
-from django.shortcuts import redirect
 
 from rest_framework import generics
 from rest_framework.filters import SearchFilter
@@ -13,7 +12,7 @@ from rest_framework.response import Response
 
 from web import models
 
-from ..serializers import curd
+from ..serializers import basic as basic_serializer
 from ..service.response import CustomResponse
 
 
@@ -32,8 +31,8 @@ class LoginApi(generics.CreateAPIView):
 
 
 class SurveyApi(generics.ListAPIView):
-    queryset = models.MiddleSurvey.objects.all()
-    serializer_class = curd.SurveySerializer
+    queryset = models.Survey.objects.all()
+    serializer_class = basic_serializer.SurveySerializer
 
     filter_backends = (SearchFilter, OrderingFilter, )
     search_fields = ("name",)
@@ -87,15 +86,14 @@ class SurveyApi(generics.ListAPIView):
 
 class SurveyDetailApi(generics.CreateAPIView, generics.RetrieveAPIView):
 
-    queryset = models.MiddleSurvey.objects.all()
+    queryset = models.Survey.objects.all()
     pagination_class = None
 
     def get_serializer_class(self):
         if self.request.method == "POST":
-            # return curd.SurveyRecordSerializer
-            return curd.MiddleSurveyCreateSerializer
+            return basic_serializer.SurveyCreateSerializer
         else:
-            return curd.MiddleSurveySerializer
+            return basic_serializer.SurveySerializer
 
     def get_serializer_context(self):
         context = super(SurveyDetailApi, self).get_serializer_context()

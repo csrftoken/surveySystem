@@ -1,18 +1,24 @@
-<div align="center">
-  <img src="http://47.94.172.250:33334/static/frontend/head_portrait/logo@2x.png?t=1542252961.100895" width="150px">
-  <br>
-  <strong>问卷调查系统</strong>
-</div>
+# surveySystem
 
-# 开发环境
+Thank you to all the people who already contributed to this project！
 
-* Python (3.6.2)
-* Django (2.1.3)
-* Drf (3.9.0)
+---
 
-# 配置开发环境
+## Introduction
 
-## 使用虚拟环境(virturalenv)
+后端使用 `django` & `DRF` 实现的 `restfulApi`  
+
+前端使用 `vue` & `element-ui` 
+
+## 开发环境
+
+- Python 3.6.8  
+- Django 2.1.5
+- Drf 3.9.4 
+
+## Quick Tutorial
+
+### 使用虚拟环境(virturalenv)
 
 ```
 pip3 install virtualenv
@@ -24,7 +30,7 @@ pip install -r requirements.txt
 
 ```
 
-## 生成表结构
+### 生成表结构
 
 ```
 python manage.py makemigrations
@@ -32,19 +38,19 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-## 导入虚拟数据
+### 导入虚拟数据
 
 ```
 python manage.py loaddata init.json
 ```
 
-## 启动项目
+### 启动项目
 
 ```
 python manage.py runserver 0.0.0.0:9527
 ```
 
-## 访问首页示例
+### 访问首页示例
 
 ## 常见问题
 
@@ -129,3 +135,16 @@ xls.save(`file_name`)
 
 ```
 
+## Donate
+
+如果本仓库对你有帮助，可以请作者喝杯白开水。
+
+Thanks ~
+
+![image](https://hcdn2.luffycity.com/media/frontend/books/1711584789344_.pic.jpg)
+
+## Support
+
+```
+2020 By Liuzhichao.
+```

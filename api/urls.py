@@ -3,13 +3,12 @@
 # Date: 2018/12/6
 
 from django.urls import path
-from django.urls import re_path
 
-from .views import curd
+from .views import basic
 
 
 urlpatterns = [
-    path("login/", curd.LoginApi.as_view()),
-    path("surveys/", curd.SurveyApi.as_view()),
-    re_path("surveys/(?P<pk>\d+)/", curd.SurveyDetailApi.as_view()),
+    path("login/", basic.LoginApi.as_view()),
+    path("surveys/", basic.SurveyApi.as_view()),
+    path("surveys/<int:pk>/", basic.SurveyDetailApi.as_view()),
 ]

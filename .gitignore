@@ -88,3 +88,5 @@ ENV/
 db.sqlite3
 
 .idea/
+
+.vscode/

@@ -7,6 +7,35 @@ import time
 from rest_framework import fields
 
 
+class ValueField(fields.Field):
+
+    default_error_messages = {
+        "invalid": "不合法的数据",
+        "required": "该项为必填项",
+        "blank": "该项为必填项"
+    }
+
+    def __init__(self, **kwargs):
+        self.allow_blank = kwargs.pop('allow_blank', False)
+        super(ValueField, self).__init__(**kwargs)
+
+    def to_representation(self, value):
+        """区分单选及多选
+
+        单选默认值为空字符串
+        多选默认值为空数组
+
+        """
+        return [] if value and value == "multiple" else ""
+
+    def to_internal_value(self, value):
+
+        if not value:
+            self.fail("blank")
+
+        return value
+
+
 class DurationDateField(fields.Field):
     """
     自定义日期字段

@@ -19,11 +19,11 @@ class ClassList(models.Model):
 class SurveyItem(models.Model):
     name = models.CharField("调查问题", max_length=255)
     date = models.DateField(auto_now_add=True)
-    answer_type_choices = (('single', "单选"), ('suggestion', "建议"))
+    answer_type_choices = (('single', "单选"), ('multiple', '多选'), ('suggestion', "建议"))
     answer_type = models.CharField("问题类型", choices=answer_type_choices, default='single', max_length=32)
 
     def __str__(self):
-        return self.name
+        return f"{self.name}-{self.get_answer_type_display()}"
 
     class Meta:
         verbose_name = '调查问卷问题列表'
@@ -37,7 +37,7 @@ class SurveyChoices(models.Model):
     points = models.IntegerField(verbose_name='分值', )
 
     def __str__(self):
-        return self.content
+        return f"{self.question}-{self.content}-{self.points}"
 
     class Meta:
         verbose_name = '问卷调查候选答案'
@@ -48,7 +48,7 @@ class SurveyCode(models.Model):
     """
     问卷唯一码
     """
-    middle_survey = models.ForeignKey("MiddleSurvey", on_delete=models.CASCADE)
+    survey = models.ForeignKey("Survey", on_delete=models.CASCADE)
     unique_code = models.CharField(max_length=32, unique=True)
     used = models.BooleanField(default=False, verbose_name="使用状态")
     used_time = models.DateTimeField(blank=True, null=True, verbose_name='使用时间')
@@ -58,13 +58,14 @@ class SurveyCode(models.Model):
         return self.unique_code
 
 
-class MiddleSurvey(models.Model):
-    """
-    中间表
+class Survey(models.Model):
+    """问卷模板
+
     """
     name = models.CharField(verbose_name="问卷名称", max_length=128, help_text="可以写详细一些")
     surveys = models.ManyToManyField(
-        "Survey", verbose_name="问卷调查列表", help_text="针对哪几个角色进行问卷调查, 统一进行填写"
+        "SurveyTemplate", verbose_name="问题模板",
+        help_text="针对哪几个角色进行问卷调查，可以几个角色一起做问卷一起做"
     )
     by_class = models.ForeignKey("ClassList", verbose_name="班级", on_delete=models.CASCADE)
     number = models.IntegerField(null=True, blank=True, verbose_name="第几次问卷调查")
@@ -86,18 +87,22 @@ class MiddleSurvey(models.Model):
         """
         调查问卷记录
         """
-        super(MiddleSurvey, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
         bulk_list = []
 
         for item in range(self.quantity):
             code = self._get_random_string()
-            bulk_list.append(SurveyCode(middle_survey=self, unique_code=code))
+            bulk_list.append(SurveyCode(survey=self, unique_code=code))
 
         SurveyCode.objects.bulk_create(bulk_list)
 
+    class Meta:
+        verbose_name = "问卷调查"
+        verbose_name_plural = "问卷调查"
 
-class Survey(models.Model):
-    name = models.CharField("调查问卷名称", max_length=128, unique=True)
+
+class SurveyTemplate(models.Model):
+    name = models.CharField("问卷模板名称", max_length=128, unique=True)
     questions = models.ManyToManyField("SurveyItem", verbose_name="选择要调查的问题列表")
     date = models.DateTimeField(auto_now_add=True, verbose_name="问卷创建日期")
 
@@ -105,19 +110,19 @@ class Survey(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = "调查问卷"
-        verbose_name_plural = "调查问卷"
+        verbose_name = "问卷调查模板"
+        verbose_name_plural = "问卷调查模板"
 
         ordering = ["-date", ]
 
 
 class SurveyRecord(models.Model):
-    middle_survey = models.ForeignKey("MiddleSurvey", verbose_name="问卷", on_delete=models.CASCADE)
-    survey = models.ForeignKey("Survey", verbose_name="针对具体角色的问卷", on_delete=models.CASCADE)
+    survey = models.ForeignKey("Survey", verbose_name="问卷", on_delete=models.CASCADE)
+    survey_template = models.ForeignKey("SurveyTemplate", verbose_name="针对具体角色的问卷", on_delete=models.CASCADE)
     survey_item = models.ForeignKey("SurveyItem", verbose_name="调查项", on_delete=models.CASCADE)
     score = models.IntegerField("评分", help_text="打分为0至10,0为非常不满意,10为非常满意,请自行斟酌", blank=True, null=True)
     suggestion = models.TextField("建议", max_length=1024, blank=True, null=True)
-    single = models.ForeignKey("SurveyChoices", verbose_name='单选', blank=True, null=True, on_delete=models.CASCADE)
+    choices = models.ManyToManyField("SurveyChoices", verbose_name='选择项', blank=True)
     survey_code = models.ForeignKey("SurveyCode", verbose_name="唯一码", blank=True, null=True, on_delete=models.CASCADE)
     is_hide = models.BooleanField(default=False, help_text="是否不进行统计,为True表示不进行统计")
     date = models.DateTimeField(auto_now_add=True, verbose_name="答题日期")
