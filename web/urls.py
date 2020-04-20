@@ -13,10 +13,9 @@ survey_urlpatterns = [
 
     re_path('^$', login_required(backend.SurveyIndexView.as_view())),
     re_path('^login/$', backend.SurveyLoginView.as_view()),
-    re_path('^(?P<pk>\d+)/report/$', login_required(backend.SurveyReportView.as_view()), name="survey-report"),
-    re_path('^(?P<pk>\d+)/$', backend.SurveyDetailView.as_view(), name='survey-detail'),
-
-    re_path('^(?P<pk>\d+)/download/$', login_required(backend.SurveyDownloadView.as_view()), name='survey-download'),
+    re_path(r'^(?P<pk>\d+)/report/$', login_required(backend.SurveyReportView.as_view()), name="survey-report"),
+    re_path(r'^(?P<pk>\d+)/$', backend.SurveyDetailView.as_view(), name='survey-detail'),
+    re_path(r'^(?P<pk>\d+)/download/$', login_required(backend.SurveyDownloadView.as_view()), name='survey-download'),
 ]
 
 

@@ -29,6 +29,9 @@
           <a href="#{{ item.id }}" aria-controls="{{ item.id }}" role="tab" data-toggle="tab">{{ item.name }}</a>
         </li>
       {% endfor %}
+      <li role="presentation">
+        <a href="#0" aria-controls="0" role="tab" data-toggle="tab">问题选项统计表</a>
+      </li>
     </ul>
     <!-- Tab panes -->
     <div class="tab-content">
@@ -103,6 +106,12 @@
           </div>
         </div>
       {% endfor %}
+      <!-- 每个问题生成一张图表 -->
+      <div role="tabpanel" class="tab-pane" id="0">
+        {% for name, data in questions.items %}
+          <div style="width: 800px;height: 450px;margin-top: 20px;" id="question-chart-{{ forloop.counter }}" name="{{ name }}" data="{{ data }}"></div>
+        {% endfor %}
+      </div>
     </div>
   </div>
 {% endblock %}
@@ -113,7 +122,72 @@
       initChart();
       initDefaultCheckbox();
       bindSurveyTabBtn();
+      initQuestionChart();
     });
+
+    /*
+     *  初始化问题图表
+     */
+
+    function initQuestionChart() {
+      let chartElements = $("div[id*='question-chart']")
+      chartElements.map(index => {
+        let reportChart = echarts.init(document.getElementById($(chartElements[index]).attr("id")));
+        let data = JSON.parse($(chartElements[index]).attr("data"))
+        let option = {
+          color: ['#3398DB'],
+          title: {
+            text: $(chartElements[index]).attr("name")
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+              type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+            }
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+          xAxis: [
+            {
+              type: 'category',
+              data: [],
+              axisTick: {
+                alignWithLabel: true
+              },
+              splitNumber: 15
+            }
+          ],
+          yAxis: [
+            {
+              name: '选项个数',
+              type: 'value'
+            }
+          ],
+          series: [
+            {
+              name: '选项个数',
+              type: 'bar',
+              barWidth: '25%',
+              data: []
+            }
+          ]
+        };
+        // response 包含 X轴坐标以及数据
+        let choice = [];
+        let choiceCount = [];
+        $.each(data, function (k, v) {
+            choice.push(k);
+            choiceCount.push(v);
+        });
+        option.xAxis[0]['data'] = choice;
+        option.series[0]['data'] = choiceCount;
+        reportChart.setOption(option);
+      })
+    }
 
     /*
      *  初始化图表

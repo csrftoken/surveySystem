@@ -3,6 +3,7 @@
 # Date: 2018/12/6
 
 import os
+import json
 import xlwt
 import operator
 
@@ -170,6 +171,31 @@ class SurveyReportView(TemplateView):
             count=Count("survey_code")
         ).count()
 
+        # 问卷问题
+        questions = {}
+        records = instance.surveyrecord_set.filter(survey_item__answer_type__in=(
+            "single", "multiple"
+        ))
+        for record in records.iterator():
+            name = record.survey_item.name
+            choices = record.choices.all()
+            if name not in questions:
+                questions[name] = {}
+                for choice in choices:
+                    if choice not in questions[name]:
+                        questions[name][choice.content] = 1
+                    else:
+                        questions[name][choice.content] += 1
+            else:
+                for choice in choices:
+                    if choice not in questions[name]:
+                        questions[name][choice.content] = 1
+                    else:
+                        questions[name][choice.content] += 1
+        context["questions"] = {
+            key: json.dumps(val)
+            for key, val in questions.items()
+        }
         return context
 
     def post(self, request, **kwargs):
