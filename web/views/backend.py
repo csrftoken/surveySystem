@@ -181,17 +181,11 @@ class SurveyReportView(TemplateView):
             choices = record.choices.all()
             if name not in questions:
                 questions[name] = {}
-                for choice in choices:
-                    if choice not in questions[name]:
-                        questions[name][choice.content] = 1
-                    else:
-                        questions[name][choice.content] += 1
-            else:
-                for choice in choices:
-                    if choice not in questions[name]:
-                        questions[name][choice.content] = 1
-                    else:
-                        questions[name][choice.content] += 1
+            for choice in choices:
+                if choice.content not in questions[name]:
+                    questions[name][choice.content] = 1
+                else:
+                    questions[name][choice.content] += 1
         context["questions"] = {
             key: json.dumps(val)
             for key, val in questions.items()
