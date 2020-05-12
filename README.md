@@ -32,6 +32,10 @@ pip install -r requirements.txt
 
 ### 生成表结构
 
+> 默认使用 `sqlite` 数据库
+
+如果您想使用 `mysql` 数据库，请移步至常见问题（配置完成后，继续如下操作）。
+
 ```
 python manage.py makemigrations
 
@@ -63,6 +67,34 @@ python manage.py runserver 0.0.0.0:8023
 ![image](https://csrftoken.oss-cn-beijing.aliyuncs.com/github/59A544B3-AE40-48DF-BA8A-2D58CB8CE9F2%2011.00.13.png)
 
 ## 常见问题
+
+### mysql 数据库使用 
+
+* 配置
+
+```
+# 在 settings.py 文件下找到 DATABASES 配置，修改为 
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': '数据库名称',
+        'USER': '用户名',
+        'PASSWORD': '密码',
+        'HOST': '',  # 默认 127.0.0.1
+        'PORT': '',  # 默认 3306
+    }
+}
+```
+
+然后连接至您的数据库终端
+
+```
+$ mysql -u 用户名 -p 密码
+创建数据库，记得指定编码
+>>> create database 数据库名称 default charset utf8;
+
+```
 
 ### 第一次执行这条语句报No changes detected
 
