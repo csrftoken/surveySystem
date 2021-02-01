@@ -57,7 +57,7 @@ python manage.py runserver 0.0.0.0:8023
 
 127.0.0.1:8023/admin/
 
-账号密码 root root23456
+账号密码 root root123456
 ```
 
 ### 效果图及代码结构图
@@ -106,10 +106,10 @@ python manage.py makemigrations
 
 * 解决
 
-在`APP`创建目录 migrations 并在里面创建__init__.py
+在 `web` 下面创建目录 migrations 并在里面创建__init__.py
 ```
-mkdir APP_NAME/migrations
-touch APP_NAME/migrations/__init__.py
+mkdir web/migrations
+touch web/migrations/__init__.py
 ```
 
 ### 模板渲染冲突
